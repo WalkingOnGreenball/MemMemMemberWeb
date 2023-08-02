@@ -1,4 +1,4 @@
-package member.controller;
+package notice.controller;
 
 import java.io.IOException;
 
@@ -9,19 +9,20 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import member.model.service.MemberService;
+import notice.model.service.NoticeService;
+import notice.model.vo.Notice;
 
 /**
- * Servlet implementation class DeleteController
+ * Servlet implementation class DetailController
  */
-@WebServlet("/member/delete.do")
-public class DeleteController extends HttpServlet {
+@WebServlet("/notice/detail.do")
+public class DetailController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public DeleteController() {
+    public DetailController() {
         super();
     }
 
@@ -29,21 +30,18 @@ public class DeleteController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		MemberService service = new MemberService();
-			// DELETE FROM MEMBER_TBL WHERE MEMBER_ID = ?
-		String memberId = request.getParameter("memberId");
-		int result = service.deleteMember(memberId);
-		if(result > 0) {
-			request.setAttribute("msg", "회원 탈퇴 성공");
-			request.setAttribute("url", "/member/logout.do");
-			RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/common/serviceSuccess.jsp");
+		// form 태그 없으면 get 방식을 써야한다.
+		// SELECT * FROM NOTICE_TBL WHERE NOTICE_NO = ?
+		int noticeNo = Integer.parseInt(request.getParameter("noticeNo"));
+		NoticeService service = new NoticeService();
+		Notice notice = service.selectOneByNo(noticeNo);
+		if(notice != null) {
+			request.setAttribute("notice", notice);
+			RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/notice/detail.jsp");
 			view.forward(request, response);
-			
-//			response.sendRedirect("/member/logout.do");
 		} else {
-			request.setAttribute("msg", "회원 탈퇴 실패");
-			RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/common/serviceFail.jsp");
-			view.forward(request, response);
+			request.setAttribute("msg", "데이터가 존재하지 않습니다.");
+			request.getRequestDispatcher("/WEB-INF/views/member/serviceFail.jsp").forward(request, response);
 		}
 	}
 
