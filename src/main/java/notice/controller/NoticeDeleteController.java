@@ -1,7 +1,6 @@
 package notice.controller;
 
 import java.io.IOException;
-import java.util.List;
 
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
@@ -11,20 +10,18 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import notice.model.service.NoticeService;
-import notice.model.vo.Notice;
-import notice.model.vo.PageData;
 
 /**
- * Servlet implementation class ListController
+ * Servlet implementation class NoticeDeleteController
  */
-@WebServlet("/notice/list.do")
-public class ListController extends HttpServlet {
+@WebServlet("/notice/delete.do")
+public class NoticeDeleteController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public ListController() {
+    public NoticeDeleteController() {
         super();
     }
 
@@ -32,14 +29,18 @@ public class ListController extends HttpServlet {
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		// form 태그의 method = "post" 가 아니면 다 get 방식 사용
+		// DELETE FROM NOTICE_TBL WHERE NOTICE_NO = ?
 		NoticeService service = new NoticeService();
-		int currentPage = Integer.parseInt(request.getParameter("currentPage"));
-		PageData pd = service.selectNoticeList(currentPage);
-		List<Notice> nList = pd.getnList();
-		request.setAttribute("nList", nList);
-		request.setAttribute("pageNavi", pd.getPageNavi());
-		RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/notice/list.jsp");
-		view.forward(request, response);
+		int noticeNo = Integer.parseInt(request.getParameter("noticeNo"));
+		int result = service.deleteNoticeByNo(noticeNo);
+		if(result > 0) {
+			response.sendRedirect("/notice/list.do");
+		} else {
+			request.setAttribute("msg", "공지사항 삭제가 완료되지 않았습니다.");
+			RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/common/serviceFail.jsp");
+			view.forward(request, response);
+		}
 	}
 
 	/**
